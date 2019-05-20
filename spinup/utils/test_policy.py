@@ -16,7 +16,9 @@ def load_policy(fpath, itr='last', deterministic=False):
         itr = '%d'%itr
 
     # load the things!
-    sess = tf.Session()
+    gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.333)
+    sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
+    # sess = tf.Session()
     model = restore_tf_graph(sess, osp.join(fpath, 'simple_save'+itr))
 
     # get the correct op for executing actions
