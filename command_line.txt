@@ -1,0 +1,12 @@
+python -m spinup.run tac --env DyrosRed-v0 --exp_name redbiped_tac_alpha_cst_q_1.2_cst_gaussian_q_log_2  --epochs 200 --lr 1e-3 --q 1.2 --pdf_type gaussian --log_type q-log --alpha_schedule constant --q_schedule constant --seed 0
+
+python -m spinup.utils.test_policy data/dyrosred_tac_alpha_cst_q_1.2_cst_gaussian_q_log_1/redbiped_tac_alpha_cst_q_1.1_cst_gaussian_q_log_1_s0
+
+python -m spinup.run plot /home/dg/tsallis_actor_critic_mujoco/data/redbiped_tac_alpha_cst_q_1.2_cst_gaussian_q_log_1/redbiped_tac_alpha_cst_q_1.2_cst_gaussian_q_log_1_s0
+
+python -m spinup.run test_policy /home/dg/tsallis_actor_critic_mujoco/data/redbiped_tac_alpha_cst_q_1.2_cst_gaussian_q_log_1/redbiped_tac_alpha_cst_q_1.2_cst_gaussian_q_log_1_s0
+
+
+--------------------------------------------------------------------------------------------------------
+
+python -m spinup.run ppo --env DyrosRed-v0 --exp_name redbiped_ppo_log_mocap_position+correction_exp1 --epochs 200000 --seed 1 --cpu 12

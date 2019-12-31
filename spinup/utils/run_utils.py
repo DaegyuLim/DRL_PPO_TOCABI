@@ -152,7 +152,7 @@ def call_experiment(exp_name, thunk, seed=0, num_cpu=1, data_dir=None,
         if 'env_name' in kwargs:
             import gym
             env_name = kwargs['env_name']
-            kwargs['env_fn'] = lambda : gym.make(env_name)
+            kwargs['env_fn'] = lambda : gym.make('custom_gym:'+env_name)
             del kwargs['env_name']
 
         # Fork into multiple processes

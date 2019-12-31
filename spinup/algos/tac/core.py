@@ -73,7 +73,7 @@ def mlp_q_gaussian_policy(x, a, q_prime, hidden_sizes, activation, output_activa
 """
 Actor-Critics
 """
-def mlp_q_actor_critic(x, a, q, hidden_sizes=(400,300), activation=tf.nn.relu, 
+def mlp_q_actor_critic(x, a, q, hidden_sizes=(512,256), activation=tf.nn.relu, 
                      output_activation=None, policy=mlp_q_gaussian_policy, pdf_type="gaussian", log_type="q-log", action_space=None):
     # policy
     with tf.variable_scope('pi'):

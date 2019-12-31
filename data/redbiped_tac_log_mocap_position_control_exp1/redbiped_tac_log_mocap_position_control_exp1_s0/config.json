@@ -1,0 +1,62 @@
+{
+    "ac_kwargs":	{},
+    "actor_critic":	"mlp_q_actor_critic",
+    "alpha":	{
+        "<spinup.algos.tac.tac.Alpha object at 0x7f86d53c17b8>":	{
+            "alpha_end":	0.01,
+            "alpha_start":	0.2,
+            "count":	0,
+            "max_iter":	200,
+            "schedule":	"constant",
+            "speed":	0.1
+        }
+    },
+    "alpha_schedule":	"constant",
+    "alpha_t":	0.2,
+    "batch_size":	256,
+    "entropic_index":	{
+        "<spinup.algos.tac.tac.EntropicIndex object at 0x7f86d5677160>":	{
+            "count":	0,
+            "max_iter":	200,
+            "q_end":	1.0,
+            "q_start":	1.0,
+            "schedule":	"constant"
+        }
+    },
+    "env_fn":	"<function call_experiment.<locals>.thunk_plus.<locals>.<lambda> at 0x7f86d566f7b8>",
+    "epochs":	200000,
+    "exp_name":	"redbiped_tac_log_mocap_position_control_exp1",
+    "gamma":	0.99,
+    "log_type":	"q-log",
+    "logger":	{
+        "<spinup.utils.logx.EpochLogger object at 0x7f86d56700f0>":	{
+            "epoch_dict":	{},
+            "exp_name":	"redbiped_tac_log_mocap_position_control_exp1",
+            "first_row":	true,
+            "log_current_row":	{},
+            "log_headers":	[],
+            "output_dir":	"/home/dg/tsallis_actor_critic_mujoco/data/redbiped_tac_log_mocap_position_control_exp1/redbiped_tac_log_mocap_position_control_exp1_s0",
+            "output_file":	{
+                "<_io.TextIOWrapper name='/home/dg/tsallis_actor_critic_mujoco/data/redbiped_tac_log_mocap_position_control_exp1/redbiped_tac_log_mocap_position_control_exp1_s0/progress.txt' mode='w' encoding='UTF-8'>":	{
+                    "mode":	"w"
+                }
+            }
+        }
+    },
+    "logger_kwargs":	{
+        "exp_name":	"redbiped_tac_log_mocap_position_control_exp1",
+        "output_dir":	"/home/dg/tsallis_actor_critic_mujoco/data/redbiped_tac_log_mocap_position_control_exp1/redbiped_tac_log_mocap_position_control_exp1_s0"
+    },
+    "lr":	0.0001,
+    "max_ep_len":	3000,
+    "pdf_type":	"gaussian",
+    "polyak":	0.995,
+    "q":	1.0,
+    "q_schedule":	"constant",
+    "q_t":	1.0,
+    "replay_size":	1000000,
+    "save_freq":	1,
+    "seed":	0,
+    "start_steps":	10000,
+    "steps_per_epoch":	4096
+}

@@ -5,6 +5,11 @@ import time
 from spinup.algos.tac import core
 from spinup.algos.tac.core import get_vars
 from spinup.utils.logx import EpochLogger
+import wandb
+
+wandb_use = False
+if wandb_use == True:
+    wandb.init(project="DRL FINAL PROJECT_HUMANOID WALKING_TAC", tensorboard=False)
 
 class Alpha:
     def __init__(self, alpha_start=0.2, alpha_end=1e-2, max_iter=200, speed=0.1, schedule='constant'):
@@ -72,13 +77,16 @@ class ReplayBuffer:
                     done=self.done_buf[idxs])
 
 def tac(env_fn, actor_critic=core.mlp_q_actor_critic, ac_kwargs=dict(), seed=0, 
-        steps_per_epoch=5000, epochs=200, replay_size=int(1e6), gamma=0.99, 
-        polyak=0.995, lr=1e-3,
+        steps_per_epoch=4096, epochs=200000, replay_size=int(1e6), gamma=0.99, 
+        polyak=0.995, lr=1e-4,
         alpha=0.2, alpha_schedule='constant',
         q=1.0, q_schedule='constant',
         pdf_type='gaussian',log_type='q-log',
-        batch_size=100, start_steps=10000, 
-        max_ep_len=1000, logger_kwargs=dict(), save_freq=1):
+        batch_size=256, start_steps=10000, 
+        max_ep_len=3000, logger_kwargs=dict(), save_freq=1):
+
+
+
 
     alpha = Alpha(alpha_start=alpha,schedule=alpha_schedule)
     entropic_index = EntropicIndex(q_end=q,schedule=q_schedule)
@@ -93,7 +101,8 @@ def tac(env_fn, actor_critic=core.mlp_q_actor_critic, ac_kwargs=dict(), seed=0,
     np.random.seed(seed)
 
     env, test_env = env_fn(), env_fn()
-    obs_dim = env.observation_space.shape[0]
+    # env.render() #dg
+    obs_dim = env.observation_space.shape[0] # phase dim +1
     act_dim = env.action_space.shape[0]
 
     # Action limit for clamping: critically, assumes all dimensions share the same bound!
@@ -192,12 +201,16 @@ def tac(env_fn, actor_critic=core.mlp_q_actor_critic, ac_kwargs=dict(), seed=0,
                 o, r, d, _ = test_env.step(a)
                 ep_ret += r
                 ep_len += 1
-            logger.store(TestEpRet=ep_ret, TestEpLen=ep_len)
+            logger.store(TestEpRet=ep_ret/ep_len, TestEpLen=ep_len)
+            if wandb_use == True:
+                wandb.log({'TestEpRet':ep_ret, 'TestEpLen':ep_len})
+
 
     start_time = time.time()
     o, r, d, ep_ret, ep_len = env.reset(), 0, False, 0, 0
     total_steps = steps_per_epoch * epochs
-
+    
+    # env.render() # rendering
     # Main loop: collect experience in env and update/log each epoch
     for t in range(total_steps):
 
@@ -212,7 +225,7 @@ def tac(env_fn, actor_critic=core.mlp_q_actor_critic, ac_kwargs=dict(), seed=0,
             a = env.action_space.sample()
         
         # Step the env
-        o2, r, d, _ = env.step(a)
+        o2, r, d, rewards = env.step(a)
         ep_ret += r
         ep_len += 1
 
@@ -229,7 +242,6 @@ def tac(env_fn, actor_critic=core.mlp_q_actor_critic, ac_kwargs=dict(), seed=0,
         o = o2
 
         if d or (ep_len == max_ep_len):
-
             for j in range(ep_len):
                 batch = replay_buffer.sample_batch(batch_size)
                 feed_dict = {x_ph: batch['obs1'],
@@ -249,9 +261,20 @@ def tac(env_fn, actor_critic=core.mlp_q_actor_critic, ac_kwargs=dict(), seed=0,
                     print(outs)
                     return
                 
-            logger.store(EpRet=ep_ret, EpLen=ep_len)
+            logger.store(EpRet=ep_ret/ep_len, EpLen=ep_len)
             o, r, d, ep_ret, ep_len = env.reset(), 0, False, 0, 0
-            
+                                        # logger.store(LossPi=outs[0], LossQ1=outs[1], LossQ2=outs[2],
+                            #  LossV=outs[3], Q1Vals=outs[4], Q2Vals=outs[5],
+                            #  VVals=outs[6], LogPi=outs[7])
+
+            if wandb_use == True:
+                wandb.log({'EpRet':ep_ret, 'EpLen':ep_len, 'LossPi': outs[0], 'LossQ1': outs[1], 'LossQ2':outs[2], 'LossV':outs[3], 'Q1Vals':outs[4], 'Q2Vals':outs[5], 'VVals':outs[6], 'LogPi':outs[7]})
+
+                if epoch % 20 ==0:
+                    for var in tf.trainable_variables():
+                        name = var.name
+                        wandb.log({name: sess.run(var)})
+
         # End of epoch wrap-up
         if t > 0 and t % steps_per_epoch == 0:
             epoch = t // steps_per_epoch
@@ -281,16 +304,22 @@ def tac(env_fn, actor_critic=core.mlp_q_actor_critic, ac_kwargs=dict(), seed=0,
             logger.log_tabular('LossV', average_only=True)
             logger.log_tabular('Time', time.time()-start_time)
             logger.dump_tabular()
-            
+            print(rewards) 
+            if wandb_use == True:
+                wandb.config.elapsed_time = time.time()-start_time
             # Update alpha and q value
             alpha_t = alpha()
             q_t = entropic_index(epoch=epoch)
 
+
+
+
+
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('--env', type=str, default='HalfCheetah-v2')
-    parser.add_argument('--hid', type=int, default=[400,300])
+    parser.add_argument('--env', type=str, default='DyrosRed-v0')
+    parser.add_argument('--hid', type=int, default=[1024,512])
     parser.add_argument('--l', type=int, default=1)
     parser.add_argument('--gamma', type=float, default=0.99)
     parser.add_argument('--seed', '-s', type=int, default=0)
@@ -303,7 +332,18 @@ if __name__ == '__main__':
     parser.add_argument('--pdf_type', type=str, default='gaussian')
     parser.add_argument('--log_type', type=str, default='q-log')
     args = parser.parse_args()
-    
+
+    if wandb_use == True:
+        wandb.config.epochs = args.epochs
+        wandb.config.batch_size = args.batch_size
+        wandb.config.steps_per_epoch = args.steps_per_epoch
+        wandb.config.gamma = args.gamma
+        wandb.config.seed = args.seed
+        wandb.config.alpha = args.alpha
+        wandb.config.alpha_schedule = args.alpha_schedule
+        wandb.config.q = args.q
+        wandb.config.q_schedule = args.q_schedule
+
     from spinup.utils.run_utils import setup_logger_kwargs
     logger_kwargs = setup_logger_kwargs(args.exp_name, args.seed)
     tac(lambda : gym.make(args.env), actor_critic=core.mlp_actor_critic,

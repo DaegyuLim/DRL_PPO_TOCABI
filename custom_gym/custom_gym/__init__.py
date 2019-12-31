@@ -10,5 +10,11 @@ register(
 register(
     id='CustomPendulum-v0',
     entry_point='custom_gym.envs:PendulumEnv',
-    max_episode_steps=200,
+    max_episode_steps=200
+)
+
+register(
+    id='DyrosRed-v0',
+    entry_point='custom_gym.envs:DyrosRedEnv',
+    max_episode_steps=200
 )

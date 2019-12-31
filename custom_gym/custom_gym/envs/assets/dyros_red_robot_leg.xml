@@ -1,0 +1,267 @@
+<mujoco model="dyros_red_description">
+    <compiler angle="radian" meshdir="../meshes/"/>
+    <size njmax="1000" nuserdata="600000" nconmax="200"/>
+
+    <default>
+
+        <joint damping="200" frictionloss="0.0"/>
+
+        <motor ctrllimited="true" ctrlrange="-5 5"/>
+
+        <default class="viz">
+            <geom contype="0" conaffinity="0" group="1" type="mesh" rgba=".6 .6 .7 1"/>
+        </default>
+
+
+        <!--Since group 2 is collision geom, rendering of group 2 geom is disabled by default in mujoco, but enabling is possible by press '2' on keyboard -->
+        <default class="cls">
+            <geom group="2" rgba="0.79216 0.81961 0.93333 0.5"/>
+        </default>
+
+        <default class="cls_f">
+            <geom group="2" rgba="0.79216 0.81961 0.93333 0.1" friction="1 0.005 0.0001"/>
+        </default>
+
+        <default class="FTsensor">
+            <site type="cylinder" size="0.005 0.005" group="4" rgba=".1 .1 .9 1"/>
+        </default>
+    </default>
+
+    <option timestep='8.333333333333333333333333333333e-04' iterations="100" tolerance="1e-11" solver="Newton" jacobian="dense" cone="elliptic" noslip_iterations="75" noslip_tolerance="1e-9"/>
+
+    <visual>
+        <map fogend="5" fogstart="3"/>
+    </visual>
+
+    <asset>
+        <mesh name="Pelvis_link" file="Pelvis_link2.STL" scale="0.001 0.001 0.001"/>
+        <mesh name="HipRoll_R_link" file="HipRoll_R_link.STL" />
+        <mesh name="HipCenter_R_Link" file="HipCenter_R_Link.STL" />
+        <mesh name="Thigh_R_Link" file="Thigh_R_Link.STL" />
+        <mesh name="Knee_R_Link" file="Knee_R_Link.STL" />
+        <mesh name="AnkleCenter_R_Link" file="AnkleCenter_R_Link.STL" />
+        <mesh name="AnkleRoll_R_Link" file="AnkleRoll_R_Link.STL" />
+        <mesh name="HipRoll_L_Link" file="HipRoll_L_Link.STL" />
+        <mesh name="HipCenter_L_Link" file="HipCenter_L_Link.STL" />
+        <mesh name="Thigh_L_Link" file="Thigh_L_Link.STL" />
+        <mesh name="Knee_L_Link" file="Knee_L_Link.STL" />
+        <mesh name="AnkleCenter_L_Link" file="AnkleCenter_L_Link.STL" />
+        <mesh name="AnkleRoll_L_Link" file="AnkleRoll_L_Link.STL" />
+        <mesh name="waist1" file="waistyaw.STL" scale="0.001 0.001 0.001"/>
+        <mesh name="waist2" file="waist2.STL" />
+        <mesh name="upperbody" file="upperbody.STL" />
+        <mesh name="R_shoulder1" file="R_shoulder1.STL" />
+        <mesh name="R_shoulder2" file="R_shoulder2.STL" />
+        <mesh name="R_shoulder3" file="R_shoulder3.STL" />
+        <mesh name="R_arm" file="R_arm.STL" />
+        <mesh name="R_elbow" file="R_elbow.STL" />
+        <mesh name="R_forearm" file="R_forearm.STL" />
+        <mesh name="R_wrist1" file="R_wrist1.STL" />
+        <mesh name="L_shoulder1" file="L_shoulder1.STL" />
+        <mesh name="L_shoulder2" file="L_shoulder2.STL" />
+        <mesh name="L_shoulder3" file="L_shoulder3.STL" />
+        <mesh name="L_arm" file="L_arm.STL" />
+        <mesh name="L_elbow" file="L_elbow.STL" />
+        <mesh name="L_forearm" file="L_forearm.STL" />
+        <mesh name="L_wrist1" file="L_wrist1.STL" />
+        <mesh name="neck" file="neck.STL" />
+        <mesh name="head" file="head.STL" />
+        <mesh name="hand" file="wrist2joint.STL" scale="0.001 0.001 0.001"/>
+
+
+        <!--texture type="skybox" builtin="gradient" width="128" height="128" rgb1="1 1 1" rgb2="0 0 0"/-->
+        <!-- <texture type="skybox" builtin="gradient" width="128" height="128" rgb1="0.4 0.6 0.8" rgb2="0 0 0"/> -->
+        <!-- <texture name="texgeom" type="cube" builtin="flat" mark="cross" width="128" height="128" rgb1="0.6 0.6 0.6" rgb2="0.6 0.6 0.6" markrgb="1 1 1"/> -->
+        <texture name="texplane" type="2d" builtin="checker" rgb1=".4 .4 .4" rgb2=".6 .6 .6" width="100" height="100"/>
+        <!-- <material name='geom' texture="texgeom" texuniform="true"/> -->
+        <material name='MatPlane' reflectance='0.3' texture="texplane" texrepeat="20 20" texuniform="true" specular="1"/>
+        <!-- <material name='MatPlane2' reflectance='0.3' /> -->
+    </asset>
+
+
+    <worldbody>
+        <geom name="ground" type="plane" pos="0 0 0.0175" size="1000 1000 .05" rgba="0.7 0.6 0.5 1" conaffinity="1" contype="1" material="MatPlane" group="3"/>
+
+        <!--geom pos="0 0 0" type="plane" size="10 10 .5" rgba=".7 .7 .7 1" material="MatPlane"/-->
+
+        <!--geom name="box" type="box" size="0.5 0.5 0.5" pos="-1.5 0 0.5"/-->
+        <!--geom name="box2" type="box" size="0.2 0.2 0.5" pos="-1.5 0 1.2"/-->
+        <!-- <geom name="wall1" type="box" size="1 0.1 1" pos="-3 3.8 1"/>
+        <geom name="wall2" type="box" size="1 0.1 1" pos="-3 2.2 1"/>
+
+        <geom name="wall3" type="box" size="1 0.1 0.068" pos="-3 -3.35 0.8"/>
+        <geom name="wall4" type="box" size="1 0.1 0.068" pos="-3 -2.65 0.8"/> -->
+        <light directional="true" diffuse=".8 .8 .8" pos="0 0 10" dir="0 0 -10"/>
+        <light directional="true" diffuse=".5 .5 .5" pos="10 0 0" dir="-10 0 0"/>
+        <!--light mode='targetbodycom' target='base_link' directional='false' diffuse='.8 .8 .8' specular='0.8 0.8 0.8' pos='0 0 10.0' dir='0 0 -1'/-->
+
+
+
+        <body name="base_link" pos="0 0 1" euler="0 0 0">
+            <camera name="track" mode="trackcom" pos="0 -4 0" xyaxes="1 0 0 0 0 1"/>
+            <joint name="virtual_joint" type="free" limited='false' frictionloss="0" damping="0" stiffness="0" armature="0"/>
+            <inertial pos="-0.0099622 0 0.012618" quat="0.5 0.5 -0.5 0.5" mass="0.90054" diaginertia="0.010198 0.0094751 0.0022311" />
+            <geom class="viz" rgba="0.20313 0.20313 0.20313 1" quat="0.5 0.5 0.5 0.5" mesh="Pelvis_link" />
+            <geom size="0.045 0.044" pos="0 0 0.019" type="cylinder" class="cls" />
+            <geom size="0.045 0.055" pos="0 0.1025 0.03" type="cylinder" class="cls" />
+            <geom size="0.045 0.055" pos="0 -0.1025 0.03" type="cylinder" class="cls" />
+            <geom size="0.12 0.1525 0.025" pos="-0.058 0 0" type="box" class="cls" />
+            <geom size="0.05 0.13 0.05" pos="-0.1 0 0.03" type="box" group="1"/>
+            <site name="Pelvis_IMU" type="cylinder" size="0.005 0.005" group="4" rgba=".1 .1 .9 1"/>
+            <body name="R_HipRoll_Link" pos="0 -0.1025 -0.1225">
+                <inertial pos="-0.06477 0 0.05149" quat="-4.55125e-06 0.706109 4.5641e-06 0.708103" mass="2.679" diaginertia="0.114073 0.114073 0.114073" />
+                <joint name="R_HipRoll_Joint" pos="0 0 0" axis="0 0 1" limited="true" range="-1.23 1.23" />
+                <geom class="viz" rgba="0.20313 0.20313 0.20313 1" mesh="HipRoll_R_link" />
+                <geom size="0.045 0.04" pos="-0.1 0 0" quat="0.707107 0 0.707107 0" type="cylinder" class="cls" />
+                <geom size="0.077 0.05 0.01" pos="-0.016 0 0.085" type="box" class="cls" />
+                <geom size="0.006 0.036 0.0475" pos="0.055 0 0.0475" type="box" class="cls" />
+                <geom size="0.006 0.036 0.0475" pos="-0.087 0 0.0475" type="box" class="cls" />
+                <body name="R_HipCenter_Link" pos="0 0 0">
+                    <inertial pos="-0.04801 -0.0022 2e-05" quat="0.999982 -0.00595644 4.6683e-06 -2.7807e-08" mass="2.67" diaginertia="0.124407 0.124407 0.124407" />
+                    <joint name="R_HipCenter_Joint" pos="0 0 0" axis="1 0 0" limited="true" range="-1.23 1.23" />
+                    <geom class="viz" rgba="0.20313 0.20313 0.20313 1" mesh="HipCenter_R_Link" />
+                    <geom size="0.05225 0.03 0.0475" pos="-0.0045 0 0" type="box" class="cls" />
+                    <body name="R_Thigh_Link" pos="0 0 0">
+                        <inertial pos="-0.00042 -0.00032 -0.18904" quat="0.707068 0.00145661 -0.000977354 0.707144" mass="5.366" diaginertia="0.339107 0.339107 0.339107" />
+                        <joint name="R_Thigh_Joint" pos="0 0 0" axis="0 1 0" limited="true" range="-1.75 1.75" />
+                        <geom size="0.049 0.038815" pos="0 0 -0.35" quat="0.707107 0.707107 0 0" type="cylinder" class="cls" />
+                        <geom size="0.06 0.10375" pos="0 0 -0.2023" type="cylinder" class="cls" />
+                        <geom class="viz" rgba="0.85938 0.07813 0.23438 1" mesh="Thigh_R_Link" />
+                        <body name="R_Knee_Link" pos="0 0 -0.35">
+                            <inertial pos="0.00429 0.00214 -0.1428" quat="0.707067 0.00548297 0.00738884 0.707087" mass="3.883" diaginertia="0.23895 0.23895 0.23895" />
+                            <joint name="R_Knee_Joint" pos="0 0 0" axis="0 1 0" limited="true" range="0 2.62" />
+                            <geom class="viz" rgba="0.85938 0.07813 0.23438 1" mesh="Knee_R_Link" />
+                            <geom size="0.06 0.1" pos="0 0 -0.175" type="cylinder" class="cls" />
+                            <body name="R_AnkleCenter_Link" pos="0 0 -0.35">
+                                <inertial pos="-0.00419 -0.0018 -0.0003" quat="0.498858 0.50114 0.501134 0.498863" mass="2.51" diaginertia="0.139901 0.139901 0.139901" />
+                                <joint name="R_AnkleCenter_Joint" pos="0 0 0" axis="0 1 0" limited="true" range="-1.57 1.57" />
+                                <geom class="viz" rgba="0.20313 0.20313 0.20313 1" mesh="AnkleCenter_R_Link" />
+                                <geom size="0.05225 0.03 0.0475" pos="-0.0045 0 0" type="box" class="cls" />
+                                <body name="R_AnkleRoll_Link" pos="0 0 0">
+                                    <inertial pos="-0.00802 0 -0.08535" quat="0.999815 -0.000353889 0.0192239 9.30274e-05" mass="3.464" diaginertia="0.07616 0.07616 0.07616" />
+                                    <joint name="R_AnkleRoll_Joint" pos="0 0 0" axis="1 0 0" limited="true" range="-1.23 1.23" />
+                                    <geom class="viz" rgba="0.85938 0.07813 0.23438 1" mesh="AnkleRoll_R_Link" />
+                                    <geom size="0.045 0.03125" pos="-0.08875 0 0" quat="0.707107 0 -0.707107 0" type="cylinder" class="cls" />
+                                    <body name="R_Foot_Plate" pos="0 0 -0.1233">
+                                        <inertial pos="0.0 0.0 0.0" quat="0.0 0.0 0 1" mass="0.0001" diaginertia="0.0001 0.0001 0.0001" />
+                                        <geom size="0.13 0.05 0.0135" pos="0.0317 0 0" type="box" class="cls_f"/>
+                                        <site class="FTsensor" name="RF_FT" pos="0 0 0.0135"/>
+                                    </body>
+                                </body>
+                            </body>
+                        </body>
+                    </body>
+                </body>
+            </body>
+            <body name="L_HipRoll_Link" pos="0 0.1025 -0.1225">
+                <inertial pos="-0.06477 0 0.05149" quat="-4.55125e-06 0.706109 4.5641e-06 0.708103" mass="2.679" diaginertia="0.114073 0.114073 0.114073" />
+                <joint name="L_HipRoll_Joint" pos="0 0 0" axis="0 0 1" limited="true" range="-1.23 1.23" />
+                <geom class="viz" rgba="0.20313 0.20313 0.20313 1" mesh="HipRoll_L_Link" />
+                <geom size="0.045 0.04" pos="-0.1 0 0" quat="0.707107 0 0.707107 0" type="cylinder" class="cls" />
+                <geom size="0.077 0.05 0.01" pos="-0.016 0 0.085" type="box" class="cls" />
+                <geom size="0.006 0.036 0.0475" pos="0.055 0 0.0475" type="box" class="cls" />
+                <geom size="0.006 0.036 0.0475" pos="-0.087 0 0.0475" type="box" class="cls" />
+                <body name="L_HipCenter_Link" pos="0 0 0">
+                    <inertial pos="-0.04801 0.0022 2e-05" quat="0.999982 -0.00595644 4.6683e-06 -2.7807e-08" mass="2.67" diaginertia="0.124407 0.124407 0.124407" />
+                    <joint name="L_HipCenter_Joint" pos="0 0 0" axis="1 0 0" limited="true" range="-1.23 1.23" />
+                    <geom class="viz" rgba="0.20313 0.20313 0.20313 1" mesh="HipCenter_L_Link" />
+                    <geom size="0.05225 0.03 0.0475" pos="-0.0045 0 0" type="box" class="cls" />
+                    <body name="L_Thigh_Link" pos="0 0 0">
+                        <inertial pos="-0.00042 0.00032 -0.18904" quat="0.707068 0.00145661 -0.000977354 0.707144" mass="5.366" diaginertia="0.339107 0.339107 0.339107" />
+                        <joint name="L_Thigh_Joint" pos="0 0 0" axis="0 1 0" limited="true" range="-1.75 1.75" />
+                        <geom class="viz" rgba="0.85938 0.07813 0.23438 1" mesh="Thigh_L_Link" />
+                        <geom size="0.049 0.038815" pos="0 0 -0.35" quat="0.707107 0.707107 0 0" type="cylinder" class="cls" />
+                        <geom size="0.06 0.10375" pos="0 0 -0.2023" type="cylinder" class="cls" />
+                        <body name="L_Knee_Link" pos="0 0 -0.35">
+                            <inertial pos="0.00429 -0.00214 -0.1428" quat="0.707067 0.00548297 0.00738884 0.707087" mass="3.883" diaginertia="0.23895 0.23895 0.23895" />
+                            <joint name="L_Knee_Joint" pos="0 0 0" axis="0 1 0" limited="true" range="0 2.62" />
+                            <geom class="viz" rgba="0.85938 0.07813 0.23438 1" mesh="Knee_L_Link" />
+                            <geom size="0.06 0.1" pos="0 0 -0.175" type="cylinder" class="cls" />
+                            <body name="L_AnkleCenter_Link" pos="0 0 -0.35">
+                                <inertial pos="-0.00419 0.0018 -0.0003" quat="0.498858 0.50114 0.501134 0.498863" mass="2.51" diaginertia="0.139901 0.139901 0.139901" />
+                                <joint name="L_AnkleCenter_Joint" pos="0 0 0" axis="0 1 0" limited="true" range="-1.57 1.57" />
+                                <geom class="viz" rgba="0.20313 0.20313 0.20313 1" mesh="AnkleCenter_L_Link" />
+                                <geom size="0.05225 0.03 0.0475" pos="-0.0045 0 0" type="box" class="cls" />
+                                <body name="L_AnkleRoll_Link" pos="0 0 0">
+                                    <inertial pos="-0.00802 0 -0.08535" quat="0.999815 -0.000353889 0.0192239 9.30274e-05" mass="3.464" diaginertia="0.07616 0.07616 0.07616" />
+                                    <joint name="L_AnkleRoll_Joint" pos="0 0 0" axis="1 0 0" limited="true" range="-1.23 1.23" />
+                                    <geom class="viz" rgba="0.85938 0.07813 0.23438 1" mesh="AnkleRoll_L_Link" />
+                                    <geom size="0.045 0.03125" pos="-0.08875 0 0" quat="0.707107 0 -0.707107 0" type="cylinder" class="cls" />
+                                    <body name="L_Foot_Plate" pos="0 0 -0.1233">
+                                        <inertial pos="0.0 0.0 0.0" quat="0.0 0.0 0 1" mass="0.0001" diaginertia="0.0001 0.0001 0.0001" />
+                                        <geom size="0.13 0.05 0.0135" pos="0.0317 0 0" type="box" class="cls_f"/>
+                                        <site class="FTsensor" name="LF_FT" pos="0 0 0.0135"/>
+                                    </body>
+                                </body>
+                            </body>
+                        </body>
+                    </body>
+                </body>
+            </body>
+        </body>
+    </worldbody>
+
+    <actuator>    
+        <position name="R_HipRoll_Motor" joint="R_HipRoll_Joint" kp="12000"/>
+        <position name="R_HipCenter_Motor" joint="R_HipCenter_Joint" kp="12000"/>
+        <position name="R_Thigh_Motor" joint="R_Thigh_Joint" kp="12000"/>
+        <position name="R_Knee_Motor" joint="R_Knee_Joint" kp="12000"/>
+        <position name="R_AnkleCenter_Motor" joint="R_AnkleCenter_Joint" kp="12000"/>
+        <position name="R_AnkleRoll_Motor" joint="R_AnkleRoll_Joint" kp="12000"/>
+
+        <position name="L_HipRoll_Motor" joint="L_HipRoll_Joint" kp="12000"/>
+        <position name="L_HipCenter_Motor" joint="L_HipCenter_Joint" kp="12000"/>
+        <position name="L_Thigh_Motor" joint="L_Thigh_Joint" kp="12000"/>
+        <position name="L_Knee_Motor" joint="L_Knee_Joint" kp="12000"/>
+        <position name="L_AnkleCenter_Motor" joint="L_AnkleCenter_Joint" kp="12000"/>
+        <position name="L_AnkleRoll_Motor" joint="L_AnkleRoll_Joint" kp="12000"/>
+
+        <!-- <motor name="R_HipRoll_Motor" joint="R_HipRoll_Joint"/>
+        <motor name="R_HipCenter_Motor" joint="R_HipCenter_Joint"/>
+        <motor name="R_Thigh_Motor" joint="R_Thigh_Joint"/>
+        <motor name="R_Knee_Motor" joint="R_Knee_Joint"/>
+        <motor name="R_AnkleCenter_Motor" joint="R_AnkleCenter_Joint"/>
+        <motor name="R_AnkleRoll_Motor" joint="R_AnkleRoll_Joint"/>
+
+        <motor name="L_HipRoll_Motor" joint="L_HipRoll_Joint"/>
+        <motor name="L_HipCenter_Motor" joint="L_HipCenter_Joint"/>
+        <motor name="L_Thigh_Motor" joint="L_Thigh_Joint"/>
+        <motor name="L_Knee_Motor" joint="L_Knee_Joint"/>
+        <motor name="L_AnkleCenter_Motor" joint="L_AnkleCenter_Joint"/>
+        <motor name="L_AnkleRoll_Motor" joint="L_AnkleRoll_Joint"/> -->
+
+        <!-- <motor name="R_HipRoll_Motor" joint="R_HipRoll_Joint" gear="100" />
+        <motor name="R_HipCenter_Motor" joint="R_HipCenter_Joint" gear="300" />
+        <motor name="R_Thigh_Motor" joint="R_Thigh_Joint" gear="500" />
+        <motor name="R_Knee_Motor" joint="R_Knee_Joint" gear="500" />
+        <motor name="R_AnkleCenter_Motor" joint="R_AnkleCenter_Joint" gear="500" />
+        <motor name="R_AnkleRoll_Motor" joint="R_AnkleRoll_Joint" gear="300" />
+
+        <motor name="L_HipRoll_Motor" joint="L_HipRoll_Joint" gear="100" />
+        <motor name="L_HipCenter_Motor" joint="L_HipCenter_Joint" gear="300" />
+        <motor name="L_Thigh_Motor" joint="L_Thigh_Joint" gear="500" />
+        <motor name="L_Knee_Motor" joint="L_Knee_Joint" gear="500" />
+        <motor name="L_AnkleCenter_Motor" joint="L_AnkleCenter_Joint" gear="500" />
+        <motor name="L_AnkleRoll_Motor" joint="L_AnkleRoll_Joint" gear="300" /> -->
+    </actuator>
+
+
+    <!-- <keyframe> -->
+        <!--Initial Position Setting -->
+        <!-- <key name="front" time="0" qpos ="0 0 0.92683 1 0 0 0 
+								0 0 -0.24 0.6 -0.36 0 
+								0 0 -0.24 0.6 -0.36 0 "/> -->
+        <!-- <key name="front" time="0" qpos ="0 0 0.92683 1 0 0 0 
+								0 0 -0.24 0.6 -0.36 0 
+								0 0 -0.24 0.6 -0.36 0 
+								0 0 0 
+								-0.3 0 -1.5 -1.87 -0.7 0 -1 0 
+								0.3 0 1.5 1.87 0.7 0 1 0"/> -->
+        <!-- <key name="zero" time="0" qpos ="0 0 0.92683 1 0 0 0 
+								0 0 0 0 0 0 
+								0 0 0 0 0 0 
+								0 0 0 
+								0 0 0 0 0 0 0 0 
+								0 0 0 0 0 0 0 0"/> -->
+    <!-- </keyframe> -->
+</mujoco>

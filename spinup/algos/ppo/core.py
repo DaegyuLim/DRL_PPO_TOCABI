@@ -26,7 +26,7 @@ def placeholder_from_space(space):
 def placeholders_from_spaces(*args):
     return [placeholder_from_space(space) for space in args]
 
-def mlp(x, hidden_sizes=(32,), activation=tf.tanh, output_activation=None):
+def mlp(x, hidden_sizes=(1024, 512), activation=tf.nn.relu, output_activation=None):
     for h in hidden_sizes[:-1]:
         x = tf.layers.dense(x, units=h, activation=activation)
     return tf.layers.dense(x, units=hidden_sizes[-1], activation=output_activation)
@@ -77,7 +77,7 @@ def mlp_categorical_policy(x, a, hidden_sizes, activation, output_activation, ac
 def mlp_gaussian_policy(x, a, hidden_sizes, activation, output_activation, action_space):
     act_dim = a.shape.as_list()[-1]
     mu = mlp(x, list(hidden_sizes)+[act_dim], activation, output_activation)
-    log_std = tf.get_variable(name='log_std', initializer=-0.5*np.ones(act_dim, dtype=np.float32))
+    log_std = tf.get_variable(name='log_std', initializer=-0.05*np.ones(act_dim, dtype=np.float32))
     std = tf.exp(log_std)
     pi = mu + tf.random_normal(tf.shape(mu)) * std
     logp = gaussian_likelihood(a, mu, log_std)
@@ -88,7 +88,7 @@ def mlp_gaussian_policy(x, a, hidden_sizes, activation, output_activation, actio
 """
 Actor-Critics
 """
-def mlp_actor_critic(x, a, hidden_sizes=(64,64), activation=tf.tanh, 
+def mlp_actor_critic(x, a, hidden_sizes=(1024,512), activation=tf.nn.relu, 
                      output_activation=None, policy=None, action_space=None):
 
     # default policy builder depends on action space

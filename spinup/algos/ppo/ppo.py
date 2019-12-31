@@ -7,7 +7,6 @@ from spinup.utils.logx import EpochLogger
 from spinup.utils.mpi_tf import MpiAdamOptimizer, sync_all_params
 from spinup.utils.mpi_tools import mpi_fork, mpi_avg, proc_id, mpi_statistics_scalar, num_procs
 
-
 class PPOBuffer:
     """
     A buffer for storing trajectories experienced by a PPO agent interacting
@@ -15,7 +14,7 @@ class PPOBuffer:
     for calculating the advantages of state-action pairs.
     """
 
-    def __init__(self, obs_dim, act_dim, size, gamma=0.99, lam=0.95):
+    def __init__(self, obs_dim, act_dim, size, gamma=0.95, lam=0.95):
         self.obs_buf = np.zeros(core.combined_shape(size, obs_dim), dtype=np.float32)
         self.act_buf = np.zeros(core.combined_shape(size, act_dim), dtype=np.float32)
         self.adv_buf = np.zeros(size, dtype=np.float32)
@@ -67,19 +66,24 @@ class PPOBuffer:
         
         self.path_start_idx = self.ptr
 
-    def get(self):
+    def get(self, minibatch_size):
         """
         Call this at the end of an epoch to get all of the data from
         the buffer, with advantages appropriately normalized (shifted to have
         mean zero and std one). Also, resets some pointers in the buffer.
         """
-        assert self.ptr == self.max_size    # buffer has to be full before you can get
+        adv_eps = 1e-5
+        # assert self.ptr == self.max_size    # buffer has to be full before you can get
         self.ptr, self.path_start_idx = 0, 0
         # the next two lines implement the advantage normalization trick
         adv_mean, adv_std = mpi_statistics_scalar(self.adv_buf)
-        self.adv_buf = (self.adv_buf - adv_mean) / adv_std
-        return [self.obs_buf, self.act_buf, self.adv_buf, 
-                self.ret_buf, self.logp_buf]
+        self.adv_buf = (self.adv_buf - adv_mean) / (adv_std + adv_eps)
+        self.adv_buf = np.clip(self.adv_buf, -4, 4)  # advantage value is clipped
+        itr = np.array(range(self.adv_buf.size))
+        np.random.shuffle(itr)
+        return [self.obs_buf[itr[0:minibatch_size]], self.act_buf[itr[0:minibatch_size]], 
+                self.adv_buf[itr[0:minibatch_size]], self.ret_buf[itr[0:minibatch_size]], 
+                self.logp_buf[itr[0:minibatch_size]]]
 
 
 """
@@ -90,8 +94,8 @@ with early stopping based on approximate KL
 
 """
 def ppo(env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0, 
-        steps_per_epoch=4000, epochs=250, gamma=0.99, clip_ratio=0.2, pi_lr=3e-4,
-        vf_lr=1e-3, train_pi_iters=80, train_v_iters=80, lam=0.97, max_ep_len=1000,
+        steps_per_epoch=4096, epochs=100000, gamma=0.95, clip_ratio=0.2, pi_lr=2.5e-6,
+        vf_lr=1e-2, train_pi_iters=16, train_v_iters=16, lam=0.95, max_ep_len=3000,
         target_kl=0.01, logger_kwargs=dict(), save_freq=10):
     """
 
@@ -164,6 +168,7 @@ def ppo(env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
             the current policy and value function.
 
     """
+    breaker = False
 
     logger = EpochLogger(**logger_kwargs)
     logger.save_config(locals())
@@ -194,7 +199,11 @@ def ppo(env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
 
     # Experience buffer
     local_steps_per_epoch = int(steps_per_epoch / num_procs())
-    buf = PPOBuffer(obs_dim, act_dim, local_steps_per_epoch, gamma, lam)
+    minibatch_size = int(steps_per_epoch/ train_pi_iters/ num_procs())
+    # buf = PPOBuffer(obs_dim, act_dim, local_steps_per_epoch, gamma, lam)
+    buffer_size = int(50000/num_procs())
+    buf = PPOBuffer(obs_dim, act_dim, buffer_size, gamma, lam)
+    print('local_steps_per_epoch: ' , local_steps_per_epoch)
 
     # Count variables
     var_counts = tuple(core.count_vars(scope) for scope in ['pi', 'v'])
@@ -228,7 +237,7 @@ def ppo(env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
     logger.setup_tf_saver(sess, inputs={'x': x_ph}, outputs={'pi': pi, 'v': v})
 
     def update():
-        inputs = {k:v for k,v in zip(all_phs, buf.get())}
+        inputs = {k:v for k,v in zip(all_phs, buf.get(minibatch_size))}
         pi_l_old, v_l_old, ent = sess.run([pi_loss, v_loss, approx_ent], feed_dict=inputs)
 
         # Training
@@ -249,21 +258,20 @@ def ppo(env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
                      DeltaLossPi=(pi_l_new - pi_l_old),
                      DeltaLossV=(v_l_new - v_l_old))
 
-    start_time = time.time()
-    o, r, d, ep_ret, ep_len = env.reset(), 0, False, 0, 0
+    def store_experience(step_num):
+        o, r, d, ep_ret, ep_len = env.reset(), 0, False, 0, 0
 
-    # Main loop: collect experience in env and update/log each epoch
-    for epoch in range(epochs):
-        for t in range(local_steps_per_epoch):
+        for t in range(step_num):
             a, v_t, logp_t = sess.run(get_action_ops, feed_dict={x_ph: o.reshape(1,-1)})
 
             # save and log
             buf.store(o, a, r, v_t, logp_t)
             logger.store(VVals=v_t)
 
-            o, r, d, _ = env.step(a[0])
+            o, r, d, info = env.step(a[0])
             ep_ret += r
             ep_len += 1
+        
 
             terminal = d or (ep_len == max_ep_len)
             if terminal or (t==local_steps_per_epoch-1):
@@ -274,8 +282,22 @@ def ppo(env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
                 buf.finish_path(last_val)
                 if terminal:
                     # only save EpRet / EpLen if trajectory finished
-                    logger.store(EpRet=ep_ret, EpLen=ep_len)
-                o, r, d, ep_ret, ep_len = env.reset(), 0, False, 0, 0
+                    logger.store(EpRet=ep_ret/ep_len, EpLen=ep_len)
+                    if ep_ret/ep_len > 0.95:
+                        breaker = True
+                        break
+                o, r, d, ep_ret, ep_len = env.reset(), 0, False, 0, 0        
+        print(info)  
+
+
+    start_time = time.time()
+
+    # Main loop: collect experience in env and update/log each epoch
+    for epoch in range(epochs):
+        if epoch == 0:
+            store_experience(buffer_size)
+        else:
+            store_experience(local_steps_per_epoch)
 
         # Save model
         if (epoch % save_freq == 0) or (epoch == epochs-1):
@@ -283,7 +305,7 @@ def ppo(env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
 
         # Perform PPO update!
         update()
-
+        
         # Log info about epoch
         logger.log_tabular('Epoch', epoch)
         logger.log_tabular('EpRet', with_min_and_max=True)
@@ -300,18 +322,20 @@ def ppo(env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
         logger.log_tabular('StopIter', average_only=True)
         logger.log_tabular('Time', time.time()-start_time)
         logger.dump_tabular()
+        if breaker == True:
+            break
 
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--env', type=str, default='HalfCheetah-v2')
-    parser.add_argument('--hid', type=int, default=64)
+    parser.add_argument('--hid', type=int, default=1024)
     parser.add_argument('--l', type=int, default=2)
-    parser.add_argument('--gamma', type=float, default=0.99)
+    parser.add_argument('--gamma', type=float, default=0.95)
     parser.add_argument('--seed', '-s', type=int, default=0)
-    parser.add_argument('--cpu', type=int, default=4)
-    parser.add_argument('--steps', type=int, default=4000)
-    parser.add_argument('--epochs', type=int, default=50)
+    parser.add_argument('--cpu', type=int, default=12)
+    parser.add_argument('--steps', type=int, default=4096)
+    parser.add_argument('--epochs', type=int, default=200000)
     parser.add_argument('--exp_name', type=str, default='ppo')
     args = parser.parse_args()
 

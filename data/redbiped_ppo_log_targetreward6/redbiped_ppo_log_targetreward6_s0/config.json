@@ -1,0 +1,39 @@
+{
+    "ac_kwargs":	{},
+    "actor_critic":	"mlp_actor_critic",
+    "breaker":	false,
+    "clip_ratio":	0.2,
+    "env_fn":	"<function call_experiment.<locals>.thunk_plus.<locals>.<lambda> at 0x7f3acb7db840>",
+    "epochs":	5000,
+    "exp_name":	"redbiped_ppo_log_targetreward6",
+    "gamma":	0.95,
+    "lam":	0.95,
+    "logger":	{
+        "<spinup.utils.logx.EpochLogger object at 0x7f3acb7e39e8>":	{
+            "epoch_dict":	{},
+            "exp_name":	"redbiped_ppo_log_targetreward6",
+            "first_row":	true,
+            "log_current_row":	{},
+            "log_headers":	[],
+            "output_dir":	"/home/dg/tsallis_actor_critic_mujoco/data/redbiped_ppo_log_targetreward6/redbiped_ppo_log_targetreward6_s0",
+            "output_file":	{
+                "<_io.TextIOWrapper name='/home/dg/tsallis_actor_critic_mujoco/data/redbiped_ppo_log_targetreward6/redbiped_ppo_log_targetreward6_s0/progress.txt' mode='w' encoding='UTF-8'>":	{
+                    "mode":	"w"
+                }
+            }
+        }
+    },
+    "logger_kwargs":	{
+        "exp_name":	"redbiped_ppo_log_targetreward6",
+        "output_dir":	"/home/dg/tsallis_actor_critic_mujoco/data/redbiped_ppo_log_targetreward6/redbiped_ppo_log_targetreward6_s0"
+    },
+    "max_ep_len":	1000,
+    "pi_lr":	2e-05,
+    "save_freq":	10,
+    "seed":	0,
+    "steps_per_epoch":	10000,
+    "target_kl":	0.01,
+    "train_pi_iters":	128,
+    "train_v_iters":	128,
+    "vf_lr":	0.01
+}

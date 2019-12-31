@@ -2,7 +2,7 @@
     "ac_kwargs":	{},
     "actor_critic":	"mlp_q_actor_critic",
     "alpha":	{
-        "<spinup.algos.tac.tac.Alpha object at 0x7fc78a4505c0>":	{
+        "<spinup.algos.tac.tac.Alpha object at 0x7f4e5dd407b8>":	{
             "alpha_end":	0.01,
             "alpha_start":	0.2,
             "count":	0,
@@ -15,7 +15,7 @@
     "alpha_t":	0.2,
     "batch_size":	100,
     "entropic_index":	{
-        "<spinup.algos.tac.tac.EntropicIndex object at 0x7fc78a450668>":	{
+        "<spinup.algos.tac.tac.EntropicIndex object at 0x7f4e5dd408d0>":	{
             "count":	0,
             "max_iter":	200,
             "q_end":	1.5,
@@ -23,13 +23,13 @@
             "schedule":	"constant"
         }
     },
-    "env_fn":	"<function call_experiment.<locals>.thunk_plus.<locals>.<lambda> at 0x7fc78a4599d8>",
+    "env_fn":	"<function call_experiment.<locals>.thunk_plus.<locals>.<lambda> at 0x7f4e5dd43840>",
     "epochs":	200,
     "exp_name":	"half_tac_alpha_cst_q_1.5_cst_gaussian_q_log",
     "gamma":	0.99,
     "log_type":	"q-log",
     "logger":	{
-        "<spinup.utils.logx.EpochLogger object at 0x7fc78a4506a0>":	{
+        "<spinup.utils.logx.EpochLogger object at 0x7f4e5dd47400>":	{
             "epoch_dict":	{},
             "exp_name":	"half_tac_alpha_cst_q_1.5_cst_gaussian_q_log",
             "first_row":	true,
